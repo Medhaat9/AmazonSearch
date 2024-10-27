@@ -1,0 +1,34 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="SuiteName">
+    <test name="TestName">
+        <classes>
+            <class name="Search.SearchTest">
+                <methods>
+                    <include name="testSearchadvanced"/>
+                    <include name="testSearchWithFilters"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
+
+
+
+
+
+
+
+<!--<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">-->
+<!--<suite name="Login Feature" parallel="instances" thread-count="1">-->
+<!--    <listeners>-->
+<!--        <listener class-name="Main.PdfReportListener"/>-->
+<!--    </listeners>-->
+<!--    <test name="LogIn">-->
+<!--        <classes>-->
+<!--            <class name="Login.VerifyTheLoginSection"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--</suite>-->
+
+
+
