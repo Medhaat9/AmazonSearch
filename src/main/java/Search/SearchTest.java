@@ -1,16 +1,17 @@
 package Search;
 
 import Main.Util;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +19,10 @@ import java.util.List;
 public class SearchTest {
     // Create a new instance of the ChromeDriver for browser automation
     WebDriver driver = new ChromeDriver();
-
+    // Initialize a WebDriverWait to wait for certain conditions
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
     @BeforeTest
     public void setUp() {
-        // Initialize a WebDriverWait to wait for certain conditions
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 
         // Navigate to the base URL specified in the Util class
         driver.get(Util.BaseUrl);
@@ -31,7 +31,7 @@ public class SearchTest {
         driver.manage().window().maximize();
 
         // Set implicit wait for the driver, allowing time for elements to be found before throwing an exception
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        //driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
 
         // Click on the 'Sign in' button
         driver.findElement(By.xpath("//span[@class='nav-line-2 ']")).click();
@@ -76,9 +76,10 @@ public class SearchTest {
         // Click the button to apply sorting by low price
         driver.findElement(By.xpath("//span[@class='a-button-text a-declarative']")).click();
         driver.findElement(By.xpath("//li[@aria-labelledby='s-result-sort-select_1']")).click();
-
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()='Bag']")));
         // Click to apply the container type filter for "Bag"
         driver.findElement(By.xpath("//span[text()='Bag']")).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()='Bag']")));
 
         // Verify that the prices are sorted correctly
         verifyPriceSorting();
@@ -93,8 +94,6 @@ public class SearchTest {
 
     @Test(priority = 1)
     public void testSearchAdvanced() throws InterruptedException {
-        // Initialize a WebDriverWait for up to 20 seconds for conditions to be met
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
         // Locator for the suggestion box
         By suggestionBoxLocator = By.className("s-suggestion-container");
@@ -154,13 +153,43 @@ public class SearchTest {
 
     private void verifyContainerType() {
         // Locate all product title elements on the page
-        List<WebElement> productTitles = driver.findElements(By.cssSelector(".s-title-text"));
+        List<WebElement> productTitles = driver.findElements(By.xpath("//h2[@class='a-size-mini a-spacing-none a-color-base s-line-clamp-4']"));
+        String ActualResult ;
+        SoftAssert Assert = new SoftAssert();
+        // Create an instance of Actions class
+        Actions actions = new Actions(driver);
+        // Store the current window handle to return to it later
+        String parentWindow = driver.getWindowHandle();
 
         // Verify that each product title contains the specified container type "Bag"
         for (WebElement title : productTitles) {
-            assert title.getText().contains(Util.ContainerType) : "Product does not contain 'Bag' in the title.";
+            //Get each element URL
+            WebElement linkElement = title.findElement(By.xpath(".//a"));
+            String url = linkElement.getAttribute("href");
+            // Use JavaScript to open the link in a new tab
+            ((JavascriptExecutor) driver).executeScript("window.open();");
+            for (String handle : driver.getWindowHandles()) {
+                if (!handle.equals(parentWindow)) {
+                    //Switch to new tab with the new element
+                    driver.switchTo().window(handle);
+                    driver.get(url);
+                    break;
+                }
+            }
+            //Wait unit category appears
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()='Bag']")));
+            //Get category text
+            ActualResult = driver.findElement(By.xpath("//span[text()='Bag']")).getText();
+            //Assert the results
+            Assert.assertEquals(ActualResult, Util.ContainerType);
+            //Close the current tab for the current element
+            driver.close();
+            //Re switch to parent window
+            driver.switchTo().window(parentWindow);
         }
 
+        // Report all assertions
+        Assert.assertAll();
         // Print confirmation that all products are correctly filtered
         System.out.println("All products are correctly filtered with container type: Bag.");
     }

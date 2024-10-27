@@ -5,5 +5,5 @@ public class Util {
     public static final String UserID = "utemp2194@outlook.com" ;
     public static final String Password = "User@1234";
     public static final String ProductName = "rice";
-    public static final String ContainerType = "bag";
+    public static final String ContainerType = "Bag";
     }
