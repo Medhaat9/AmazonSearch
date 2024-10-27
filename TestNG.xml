@@ -4,7 +4,7 @@
         <classes>
             <class name="Search.SearchTest">
                 <methods>
-                    <include name="testSearchadvanced"/>
+                    <include name="testSearchAdvanced"/>
                     <include name="testSearchWithFilters"/>
                 </methods>
             </class>
